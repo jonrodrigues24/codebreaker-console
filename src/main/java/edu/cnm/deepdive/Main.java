@@ -1,17 +1,25 @@
 package edu.cnm.deepdive;
 
+import edu.cnm.deepdive.model.Game;
+import edu.cnm.deepdive.service.GameRepository;
+import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
 public class Main {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     Scanner scanner = new Scanner(System.in);
     ResourceBundle bundle = ResourceBundle.getBundle("strings");
+    GameRepository repository = new GameRepository();
     // TODO Create proxy class for service.
     do {
+
+
+
+
       // TODO Play a single game
-      // TODO Ask the user if they want to play again; set running accordingly
+      repository.newGame("0123456789", 3);
     } while (queryReplay(scanner, bundle));
   }
   private static boolean queryReplay(Scanner scanner, ResourceBundle bundle) {
