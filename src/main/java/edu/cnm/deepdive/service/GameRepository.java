@@ -26,7 +26,7 @@ public class GameRepository {
    * @return
    * @throws IOException
    */
-  public Game newGame(String pool, int length) throws IOException {
+  public Game newGame(String pool, int length) throws IOException, IllegalArgumentException {
 
     Game gameStub = new Game();
 
@@ -40,7 +40,7 @@ public class GameRepository {
     return response.body();
   }
 
-  public Guess newGuess(Game game, String text) throws IOException {
+  public Guess newGuess(Game game, String text) throws IOException, IllegalArgumentException {
 
     Guess guess = new Guess();
     guess.setText(text);
