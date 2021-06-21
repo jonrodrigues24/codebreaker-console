@@ -15,6 +15,12 @@ import java.util.Scanner;
  */
 public class Main {
 
+  private static final String POOL = "AEIOUY";
+  private static final String BUNDLE_NAME = "strings";
+  public static final String REPLAY_PROMPT_KEY = "replay_prompt";
+  public static final char NEGATIVE_RESPONSE = 'n';
+  public static final int CODE_LENGTH = 7;
+
   /**
    * Entry point for game. Connects to Codebreaker service to start each game, and query the user
    * for guesses, until the user declines to play again.
@@ -24,16 +30,14 @@ public class Main {
    */
   public static void main(String[] args) throws IOException {
     Scanner scanner = new Scanner(System.in);
-    ResourceBundle bundle = ResourceBundle.getBundle("strings");
+    ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME);
     GameRepository repository = new GameRepository();
-    // TODO Create proxy class for service.
     do {
 
-
-
-
       // TODO Play a single game
-      repository.newGame("0123456789", 3);
+      Game game = repository.newGame(POOL, CODE_LENGTH);
+      System.out.printf("Secret code of length %d generated from the pool \"%s\".%n",
+          game.getLength(), game.getPool());
     } while (queryReplay(scanner, bundle));
   }
 
@@ -45,11 +49,11 @@ public class Main {
    */
   private static boolean queryReplay(Scanner scanner, ResourceBundle bundle) {
 
-    System.out.println(bundle.getString("replay_prompt"));
+    System.out.println(bundle.getString(REPLAY_PROMPT_KEY));
 
     String input = scanner.nextLine().trim().toLowerCase();
 
-    return (input.isEmpty() || input.charAt(0) != 'n');
+    return (input.isEmpty() || input.charAt(0) != NEGATIVE_RESPONSE);
 
   }
 
