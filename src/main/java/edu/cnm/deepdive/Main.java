@@ -3,13 +3,14 @@ package edu.cnm.deepdive;
 import edu.cnm.deepdive.model.Game;
 import edu.cnm.deepdive.model.Guess;
 import edu.cnm.deepdive.service.GameRepository;
+import edu.cnm.deepdive.service.GameRepository.ValidationException;
 import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
 /**
- * Implements a simple client for a Codebreaker (similar to MasterMind, Bulls and Cows) game
- * that runs as a web service. This uses console interaction (standard input &amp; output) to obtain
+ * Implements a simple client for a Codebreaker (similar to MasterMind, Bulls and Cows) game that
+ * runs as a web service. This uses console interaction (standard input &amp; output) to obtain
  * guesses from the user and display the result of each guess.
  *
  * @author Jonathan Rodrigues and DDC Java + Android Bootcamp cohort 13.
@@ -24,13 +25,15 @@ public class Main {
   private static final String INITIAL_STATUS_KEY = "initial_status_format";
   private static final String GUESS_PROMPT_KEY = "guess_prompt_format";
   private static final String GUESS_RESULTS_KEY = "guess_results_format";
+  private static final String VALIDATION_ERROR_KEY = "validation_error_format";
 
   /**
    * Entry point for game. Connects to Codebreaker service to start each game, and query the user
    * for guesses, until the user declines to play again.
+   *
    * @param args Command line argusments (not currently used).
    * @throws IOException If a network or network resource (such as web service) fails in sending the
-   * request and receiving the response.
+   *                     request and receiving the response.
    */
   public static void main(String[] args) throws IOException {
     Scanner scanner = new Scanner(System.in);
@@ -43,26 +46,33 @@ public class Main {
 
   private static void play(Scanner scanner, ResourceBundle bundle, GameRepository repository)
       throws IOException {
-    // TODO Play a single game
     String initialStatusFormat = bundle.getString(INITIAL_STATUS_KEY);
     String guessPromptFormat = bundle.getString(GUESS_PROMPT_KEY);
     String guessResultsFormat = bundle.getString(GUESS_RESULTS_KEY);
+    String validationErrorFormat = bundle.getString(VALIDATION_ERROR_KEY);
     Game game = repository.newGame(POOL, CODE_LENGTH);
     System.out.printf(initialStatusFormat, game.getLength(), game.getPool());
-    Guess guess;
+    Guess guess = null;
+    boolean validationFailed;
     do {
       System.out.printf(guessPromptFormat, game.getLength(), game.getPool());
       String input = scanner.nextLine().trim().toUpperCase();
-      //TODO Validate input before sending, ....
-      guess = repository.newGuess(game, input);
-      //TODO ... or, catch IllegalArgumentException & show error to server, then allow new guess.
-      System.out.printf(guessResultsFormat,
-          guess.getText(), guess.getExactMatches(), guess.getNearMatches());
-    } while (!guess.isSolution());
+      try {
+        guess = repository.newGuess(game, input);
+       validationFailed = false;
+        System.out.printf(guessResultsFormat,
+            guess.getText(), guess.getExactMatches(), guess.getNearMatches());
+      } catch (ValidationException e) {
+        validationFailed = true;
+        System.out.printf(validationErrorFormat,
+                input, e.getError().getDetails().getText());
+      }
+    } while (validationFailed || !guess.isSolution());
   }
 
   /**
    * Prompts the user to play again. If a resource
+   *
    * @param scanner
    * @param bundle
    * @return
